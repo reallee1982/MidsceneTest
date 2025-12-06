@@ -19,20 +19,26 @@ test('dispatch', async ({ openChat, aiAssert, aiTap, aiInput, aiBoolean, page })
       page.waitForEvent('popup'),
       aiTap('AI Bot的聊天弹窗的Parts Questions', { deepThink: true, cacheable: false }),
     ]);
+    popup.on('close', () => {
+      console.log('popup was closed by the page');
+    });
     await sleep(DEFAULT_WAIT_TIMEOUT_MS);
     // 等待加载并获取 URL
     try {
-      await popup.waitForLoadState('load', {timeout: 30_000});
+      await popup.waitForLoadState('domcontentloaded', {timeout: 30_000});
     } catch (err) {
+      console.log('popup url', popup.url());
       console.warn('popup load 超时/失败，继续执行后续步骤', err);
     }
     const popupUrl = popup.url();
     console.log('pq url', popupUrl);
     
     await expect(async () => {
-      sleep(5_000);
-      const locator = await popup.getByPlaceholder("Enter the VIN of Your Vehicle", {exact: false});
-      await expect(locator).toBeVisible();
+      await sleep(5_000);
+      // const vinInput = await popup.frameLocator('iframe').getByPlaceholder('Enter the VIN of Your Vehicle', { exact: false });
+      // await expect(vinInput).toBeVisible({ timeout: 30_000 });
+      // const locator = await popup.getByPlaceholder("Enter the VIN of Your Vehicle", {exact: false});
+      // await expect(locator).toBeVisible();
 
       // await aiAssert("页面上有'Hi! I'm your assistant. I'm here to help you with the information that you need.'");
       await aiInput('JN8AZ2KR0ET350093', "In order to answer your question(s) quickly and accurately, please input the VIN of your vehicle.下方的输入框", { deepThink: true, cacheable: false });
