@@ -15,11 +15,24 @@ test('dispatch', async ({ openChat, aiAssert, aiTap, aiWaitFor, aiInput, aiStrin
 
   await test.step('Parts Questions', async () => {
     // 定位错误时重试
+    const [popup] = await Promise.all([
+      page.waitForEvent('popup'),
+      aiTap('AI Bot的聊天弹窗的Parts Questions', { deepThink: true, cacheable: false }),
+    ]);
+    await sleep(DEFAULT_WAIT_TIMEOUT_MS);
+    // 等待加载并获取 URL
+    try {
+      await popup.waitForLoadState('load', {timeout: 30_000});
+    } catch (err) {
+      console.warn('goto 超时/失败，继续执行后续步骤', err);
+    }
+    const popupUrl = popup.url();
+    console.log('pq url', popupUrl);
+    
     await expect(async () => {
-      await aiTap('AI Bot的聊天弹窗的Parts Questions', { deepThink: true, cacheable: false });
       await aiWaitFor("页面上I'm your assistant可见",  {timeoutMs: DEFAULT_WAIT_TIMEOUT_MS });
       await aiWaitFor("输入框Enter the VIN可见", {timeoutMs: DEFAULT_WAIT_TIMEOUT_MS });
-      await sleep(2000);
+      
       await aiAssert("输入框Enter the VIN可见");
     }).toPass({ timeout: 30_000, intervals: [3_000, 5_000, 10_000] });
 
@@ -43,11 +56,11 @@ test('dispatch', async ({ openChat, aiAssert, aiTap, aiWaitFor, aiInput, aiStrin
     await aiAssert(`Parts Questions输入框内文本是${QUESTION}`);
 
     // 设置接口监听
-    const waitExtract = page.waitForResponse(
+    const waitExtract = popup.waitForResponse(
       (res) => res.url().includes('/pq/extractPartNumber') && res.request().method() === 'POST',
       { timeout: 60_000 },
     );
-    const waitDispatch = page.waitForResponse(
+    const waitDispatch = popup.waitForResponse(
       (res) => res.url().includes('/pq/dispatch') && res.request().method() === 'POST',
       { timeout: 60_000 },
     );
