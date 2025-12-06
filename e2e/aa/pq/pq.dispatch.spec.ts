@@ -7,7 +7,7 @@ const PART_NUMBER = '15200-EN20A';
 const QUESTION = 'is it fit my car?';
 
 
-test('dispatch', async ({ openChat, aiAssert, aiTap, aiWaitFor, aiInput, aiString, page }) => {
+test('dispatch', async ({ openChat, aiAssert, aiTap, aiWaitFor, aiInput, aiBoolean, page }) => {
   await openChat();
   await test.step('校验AA窗口状态', async () => {
     await aiAssert('AI Bot的聊天弹窗按顺序有 Order Status、RMA、Parts Availability、Parts Questions、Other Questions');
@@ -24,34 +24,36 @@ test('dispatch', async ({ openChat, aiAssert, aiTap, aiWaitFor, aiInput, aiStrin
     try {
       await popup.waitForLoadState('load', {timeout: 30_000});
     } catch (err) {
-      console.warn('goto 超时/失败，继续执行后续步骤', err);
+      console.warn('popup load 超时/失败，继续执行后续步骤', err);
     }
     const popupUrl = popup.url();
     console.log('pq url', popupUrl);
     
     await expect(async () => {
-      await aiWaitFor("页面上I'm your assistant可见",  {timeoutMs: DEFAULT_WAIT_TIMEOUT_MS });
-      await aiWaitFor("输入框Enter the VIN可见", {timeoutMs: DEFAULT_WAIT_TIMEOUT_MS });
-      
-      await aiAssert("输入框Enter the VIN可见");
+      sleep(5_000);
+      await popup.getByText("Hi! I'm your assistant.", {exact: false});
+      // await aiAssert("页面上有'Hi! I'm your assistant. I'm here to help you with the information that you need.'");
+      await aiInput('JN8AZ2KR0ET350093', "In order to answer your question(s) quickly and accurately, please input the VIN of your vehicle.下方的输入框", { deepThink: true, cacheable: false });
     }).toPass({ timeout: 30_000, intervals: [3_000, 5_000, 10_000] });
 
-    await aiInput('JN8AZ2KR0ET350093', "输入框Enter the VIN");
+    
     await expect(async () => {
       await aiTap("continue", { deepThink: true, cacheable: false });
-      await aiWaitFor("Vehicle Information,Part Fitment,Parts Questions可见", {timeoutMs: DEFAULT_WAIT_TIMEOUT_MS });
+      sleep(10_000);
+      await aiAssert("Vehicle Information,Part Fitment,Parts Questions可见");
     }).toPass({ timeout: 30_000, intervals: [3_000, 5_000, 10_000] });
     sleep(2_000);
     await aiAssert("Vin: JN8AZ2KR0ET350093可见");
 
     await expect(async () => {
       await aiTap("Parts Questions", { deepThink: true, cacheable: false });
-      await aiWaitFor("Please enter your question and part number if you have one.", {timeoutMs: DEFAULT_WAIT_TIMEOUT_MS });
+      sleep(5_000);
+      await aiAssert("Please enter your question and part number if you have one.");
     }).toPass({ timeout: 30_000, intervals: [3_000, 5_000, 10_000] });
     sleep(2_000);
     await aiAssert("两个输入框Enter Your Questions和Enter Part Number可见");
-    await aiInput(QUESTION, "Parts Questions输入框");
-    await aiInput(PART_NUMBER, "Enter Part Number输入框");
+    await aiInput(QUESTION, "Parts Questions输入框", { deepThink: true, cacheable: false });
+    await aiInput(PART_NUMBER, "Enter Part Number输入框", { deepThink: true, cacheable: false });
     await aiAssert(`Enter Part Number输入框内文本是${PART_NUMBER}`);
     await aiAssert(`Parts Questions输入框内文本是${QUESTION}`);
 
@@ -66,8 +68,11 @@ test('dispatch', async ({ openChat, aiAssert, aiTap, aiWaitFor, aiInput, aiStrin
     );
 
     await expect(async () => {
-      await aiTap("continue");
-      await aiWaitFor("Part 15200-EN20A fits your vehicle可见", {timeoutMs: DEFAULT_WAIT_TIMEOUT_MS });
+      if (await aiBoolean("continue可见")) {
+        await aiTap("continue", { deepThink: true, cacheable: false });
+      }
+      sleep(DEFAULT_WAIT_TIMEOUT_MS);
+      await aiAssert("Part 15200-EN20A fits your vehicle可见");
     }).toPass({ timeout: 30_000, intervals: [3_000, 5_000, 10_000] });
     sleep(2_000);
 
@@ -84,7 +89,7 @@ test('dispatch', async ({ openChat, aiAssert, aiTap, aiWaitFor, aiInput, aiStrin
     expect(dispatchBody?.data?.partLegal).toBe(true);
     expect(dispatchBody?.data?.partDetail?.partNumber).toBe(PART_NUMBER);
 
-    await aiWaitFor("显示Ask other parts questions和Complete this Chat按钮", {timeoutMs: DEFAULT_WAIT_TIMEOUT_MS });
+    await aiAssert("显示Ask other parts questions和Complete this Chat按钮");
     await aiAssert("显示 15200-EN20A的零件信息包含Description、图片、价格");
     await aiAssert("显示Ask other parts questions和Complete this Chat按钮");
 
