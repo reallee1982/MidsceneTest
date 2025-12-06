@@ -7,7 +7,7 @@ const PART_NUMBER = '15200-EN20A';
 const QUESTION = 'is it fit my car?';
 
 
-test('dispatch', async ({ openChat, aiAssert, aiTap, aiWaitFor, aiInput, aiBoolean, page }) => {
+test('dispatch', async ({ openChat, aiAssert, aiTap, aiInput, aiBoolean, page }) => {
   await openChat();
   await test.step('校验AA窗口状态', async () => {
     await aiAssert('AI Bot的聊天弹窗按顺序有 Order Status、RMA、Parts Availability、Parts Questions、Other Questions');
@@ -31,7 +31,9 @@ test('dispatch', async ({ openChat, aiAssert, aiTap, aiWaitFor, aiInput, aiBoole
     
     await expect(async () => {
       sleep(5_000);
-      await popup.getByText("Hi! I'm your assistant.", {exact: false});
+      const locator = await popup.getByPlaceholder("Enter the VIN of Your Vehicle", {exact: false});
+      await expect(locator).toBeVisible();
+
       // await aiAssert("页面上有'Hi! I'm your assistant. I'm here to help you with the information that you need.'");
       await aiInput('JN8AZ2KR0ET350093', "In order to answer your question(s) quickly and accurately, please input the VIN of your vehicle.下方的输入框", { deepThink: true, cacheable: false });
     }).toPass({ timeout: 30_000, intervals: [3_000, 5_000, 10_000] });
