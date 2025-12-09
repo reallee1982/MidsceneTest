@@ -47,6 +47,7 @@ output/
 .sdkmanrc
 CLAUDE.md
 claude_docs/
+GEMINI.md
 Agents.md
 midscene_run/
 playwright-report/
