@@ -58,9 +58,8 @@ export class PartsQuestionPopup {
     // "continue" is used in the AI prompt for submission too?
     // "if (await popupAgent.aiBoolean("continue可见")) ..."
     const continueBtn = this.page.getByRole('button', { name: 'continue', exact: false });
-    if (await continueBtn.isVisible()) {
-        await continueBtn.click();
-    }
+    await expect(continueBtn).toBeVisible();
+    await continueBtn.click();
   }
 
   async verifyResult(partNumber: string) {
