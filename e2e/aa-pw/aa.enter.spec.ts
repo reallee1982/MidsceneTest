@@ -1,13 +1,12 @@
 import { test, expect } from './fixture';
 
-const DEFAULT_BASE_URL = 'https://npd.test.autobestdevops.com';
 const DEFAULT_VIEWPORT = { width: 1280, height: 768 };
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, runtimeConfig }) => {
   await page.setViewportSize(DEFAULT_VIEWPORT);
   await page.setExtraHTTPHeaders({ 'User-Agent': DEFAULT_USER_AGENT });
-  await page.goto(DEFAULT_BASE_URL, { waitUntil: 'load' });
+  await page.goto(runtimeConfig.baseURL, { waitUntil: 'load' });
 });
 
 test('aa enter', async ({ chatWidget }) => {

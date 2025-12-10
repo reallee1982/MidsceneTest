@@ -5,7 +5,6 @@ export class ChatWidget {
   readonly minimizedFrame: Locator;
   readonly widgetFrame: Locator;
   readonly openButton: Locator;
-  readonly letsChatButton: Locator;
   readonly startChatButton: Locator;
   readonly menuItems: Locator;
 
