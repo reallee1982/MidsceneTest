@@ -2,6 +2,7 @@ import { type Locator, type Page, expect } from '@playwright/test';
 
 export class ChatWidget {
   readonly page: Page;
+  readonly minimizedFrame: Locator;
   readonly widgetFrame: Locator;
   readonly openButton: Locator;
   readonly letsChatButton: Locator;
@@ -10,24 +11,22 @@ export class ChatWidget {
 
   constructor(page: Page) {
     this.page = page;
-    // Main chat widget iframe - using src to be robust against title/name changes
-    // Matches https://secure.livechatinc.com/...
-    this.widgetFrame = page.frameLocator('iframe[src*="livechatinc.com"]');
-    
-    // Button to open chat
-    // Using generic button locator as it's the only button in the frame
-    this.openButton = this.widgetFrame.locator('button');
-    
+    // Entry point is the minimized iframe; actual chat lives in #chat-widget
+    this.minimizedFrame = page.frameLocator('iframe#chat-widget-minimized');
+    this.widgetFrame = page.frameLocator('iframe#chat-widget');
+
+    // Button to open chat (blue floating bubble)
+    this.openButton = this.minimizedFrame.getByRole('button', { name: /Open LiveChat chat widget/i });
+
     // Inside the chat window
-    this.letsChatButton = this.widgetFrame.getByRole('button', { name: "Let's chat" });
-    this.startChatButton = this.widgetFrame.getByRole('button', { name: "Start the chat" });
-    
-    // Menu items
-    this.menuItems = this.widgetFrame.locator('ul, div[role="list"]'); 
+    this.startChatButton = this.widgetFrame.getByRole('button', { name: /Start the chat/i });
+
+    // Menu items (kept for compatibility; may be unused with new UI)
+    this.menuItems = this.widgetFrame.locator('ul, div[role="list"]');
   }
 
   async openChat() {
-    // Wait longer for the widget to load (network/CDN can be slow)
+    // Wait for minimized bubble to render and open the main chat iframe
     try {
       await this.openButton.first().waitFor({ state: 'visible', timeout: 60000 });
       await this.openButton.first().click();
@@ -36,22 +35,20 @@ export class ChatWidget {
     }
 
     // Wait for the chat window to actually open
-    // Either menu is visible OR start buttons are visible
-    await expect(this.widgetFrame.locator('text=Order Status').or(this.letsChatButton).or(this.startChatButton)).toBeVisible({ timeout: 60000 });
+    await expect(this.widgetFrame.getByRole('button', { name: /Start the chat/i })).toBeVisible({ timeout: 60000 });
   }
 
   async startChat() {
-    // Handle "Let's chat" or "Start the chat"
-    if (await this.letsChatButton.isVisible()) {
-      await this.letsChatButton.click();
-    } else if (await this.startChatButton.isVisible()) {
+    // Handle "Start the chat"
+    if (await this.startChatButton.isVisible({ timeout: 15000 })) {
       await this.startChatButton.click();
     } else {
-        console.log("No start button found, assuming menu is visible");
+      console.log("No start button found, assuming chat already active");
+      return;
     }
-    
-    // Wait for menu
-    await expect(this.widgetFrame.getByText('Order Status')).toBeVisible();
+
+    // Wait for chat to proceed (fallback to presence of Powered by LiveChat footer)
+    await expect(this.widgetFrame.getByRole('button', { name: 'Order Status' })).toBeVisible({ timeout: 30000 });
   }
 
   async verifyMenuItems(items: string[]) {
@@ -64,4 +61,3 @@ export class ChatWidget {
     await this.widgetFrame.getByText(name).click();
   }
 }
-

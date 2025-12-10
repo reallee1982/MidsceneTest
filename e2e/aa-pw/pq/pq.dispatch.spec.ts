@@ -1,6 +1,6 @@
 import { test, expect } from '../fixture';
 
-const DEFAULT_BASE_URL = 'https://npd.dev.autobestdevops.com';
+const DEFAULT_BASE_URL = 'https://npd.test.autobestdevops.com';
 const DEFAULT_VIEWPORT = { width: 1280, height: 768 };
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36';
 
@@ -10,7 +10,7 @@ const VIN = 'JN8AZ2KR0ET350093';
 
 test.beforeEach(async ({ page }) => {
   await page.setViewportSize(DEFAULT_VIEWPORT);
-  // await page.setExtraHTTPHeaders({ 'User-Agent': DEFAULT_USER_AGENT });
+  await page.setExtraHTTPHeaders({ 'User-Agent': DEFAULT_USER_AGENT });
   await page.goto(DEFAULT_BASE_URL, { waitUntil: 'load' });
 });
 
@@ -18,7 +18,7 @@ test('dispatch', async ({ page, chatWidget, createPartsQuestionPopup }) => {
   await test.step('Open Chat and verify menu', async () => {
     await chatWidget.openChat();
     await chatWidget.startChat();
-    await chatWidget.verifyMenuItems(['Parts Questions']);
+    await expect(chatWidget.widgetFrame.getByRole('button', { name: 'Parts Questions' })).toBeVisible();
   });
 
   await test.step('Parts Questions Flow', async () => {
