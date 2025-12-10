@@ -6,7 +6,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const DEFAULT_VIEWPORT = { width: 1280, height: 768 };
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36';
-const DEFAULT_BASE_URL = 'https://npd.test.autobestdevops.com';
+const DEFAULT_BASE_URL = 'https://npd.dev.autobestdevops.com';
 const DEFAULT_WAIT_TIMEOUT_MS = 15_000;
 
 type ChatFixture = {

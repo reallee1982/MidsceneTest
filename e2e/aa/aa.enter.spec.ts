@@ -1,4 +1,4 @@
-import { test } from '../fixture';
+import { test } from './fixture';
 
 test('aa enter', async ({ openChat, aiAssert }) => {
   await openChat();

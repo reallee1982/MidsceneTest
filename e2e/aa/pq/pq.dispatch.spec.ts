@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { PlaywrightAgent } from '@midscene/web/playwright';
-import { test } from '../../fixture';
+import { test } from '../fixture';
 
 const DEFAULT_WAIT_TIMEOUT_MS = 15_000;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
