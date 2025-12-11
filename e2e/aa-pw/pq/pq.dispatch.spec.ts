@@ -10,13 +10,13 @@ test.beforeEach(async ({ page, runtimeConfig }) => {
 });
 
 test('dispatch', async ({ page, chatWidget, createPartsQuestionPopup, runtimeConfig }) => {
-  await test.step('Open Chat and verify menu', async () => {
-    await chatWidget.openChat();
-    await chatWidget.startChat();
-    await expect(chatWidget.widgetFrame.getByRole('button', { name: 'Parts Questions' })).toBeVisible();
-  });
-
   for (const data of runtimeConfig.data) {
+    await test.step('Open Chat and verify menu', async () => {
+      await chatWidget.openChat();
+      await chatWidget.startChat();
+      await expect(chatWidget.widgetFrame.getByRole('button', { name: 'Parts Questions' })).toBeVisible();
+    });
+
     await test.step(`Parts Questions Flow for vin: ${data.VIN}, part: ${data.PART_NUMBER}, question: ${data.QUESTION}`, async () => {
       // Click 'Parts Questions' and wait for popup
       const [popup] = await Promise.all([
@@ -73,6 +73,12 @@ test('dispatch', async ({ page, chatWidget, createPartsQuestionPopup, runtimeCon
 
       // Verify UI Result
       await popupPO.verifyResult(data.PART_NUMBER);
+
+      // Close popup to avoid leaking pages across iterations
+      await popup.close();
     });
   }
+
+  // Close main page at the end of the test
+  await page.close();
 });
