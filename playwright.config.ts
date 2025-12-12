@@ -43,7 +43,7 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'npd-dev',
+      name: 'hpn-dev',
       use: { ...devices['Desktop Chrome'] },
     },
     {
