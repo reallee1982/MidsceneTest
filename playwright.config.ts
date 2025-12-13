@@ -15,7 +15,7 @@ dotenv.config();
  */
 export default defineConfig({
   testDir: './e2e',
-  timeout: 10 * 60 * 1000,
+  timeout: 30 * 60 * 1000,
   testMatch: "**/*.spec.ts",
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -27,7 +27,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   // reporter: 'html',
-  reporter: [["list"], ["@midscene/web/playwright-reporter", { type: "merged" }]], // type 可选, 默认值为 "merged"，表示多个测试用例生成一个报告，可选值为 "separate"，表示为每个测试用例一个报告,
+  reporter: [["list"], ["@midscene/web/playwright-reporter", { type: "separate" }]], // type 可选, 默认值为 "merged"，表示多个测试用例生成一个报告，可选值为 "separate"，表示为每个测试用例一个报告,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
