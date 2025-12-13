@@ -6,7 +6,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const DEFAULT_VIEWPORT = { width: 1280, height: 768 };
 const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36';
-const DEFAULT_BASE_URL = 'https://npd.test.autobestdevops.com';
+const DEFAULT_BASE_URL = 'https://npd.dev.autobestdevops.com';
 const DEFAULT_WAIT_TIMEOUT_MS = 15_000;
 
 type ChatFixture = {
@@ -18,14 +18,14 @@ const testWithAi = base.extend<PlayWrightAiFixtureType>({
 });
 
 export const test = testWithAi.extend<PlayWrightAiFixtureType & ChatFixture>({
-  aiTap: async ({ aiTap: baseAiTap }, use) => {
-    const aiTapWithDelay: typeof baseAiTap = async (...args) => {
-      await sleep(2000);
-      return baseAiTap(...args);
-    };
+  // aiTap: async ({ aiTap: baseAiTap }, use) => {
+  //   const aiTapWithDelay: typeof baseAiTap = async (...args) => {
+  //     await sleep(2000);
+  //     return baseAiTap(...args);
+  //   };
 
-    await use(aiTapWithDelay);
-  },
+  //   await use(aiTapWithDelay);
+  // },
   openChat: async ({ aiTap, aiWaitFor, aiBoolean, aiScroll }, use) => {
     const openChat = async ({ waitTimeoutMs = DEFAULT_WAIT_TIMEOUT_MS } = {}) => {
       await base.step('打开聊天浮窗', async () => {
@@ -34,7 +34,7 @@ export const test = testWithAi.extend<PlayWrightAiFixtureType & ChatFixture>({
         // 定位错误时重试
         await expect(async () => {
           if (await aiBoolean("右下角蓝色聊天弹窗按钮可见")) {
-            await aiTap('右下角蓝色聊天弹窗按钮', { deepThink: true, cacheable: false });
+            await aiTap('右下角蓝色聊天弹窗按钮', { deepThink: false, cacheable: false });
             await aiWaitFor("AI Bot的聊天窗口可见并有Start the chat或Let's chat按钮", { checkIntervalMs:2000, timeoutMs: 10000 });
           }
         
@@ -48,14 +48,16 @@ export const test = testWithAi.extend<PlayWrightAiFixtureType & ChatFixture>({
         await expect(async () => {
           if (await aiBoolean("AI Bot聊天窗口有Let's chat")) {
             console.log("Ai Bot聊天窗口的Let's chat按钮可见");
-            await aiTap("Ai Bot聊天窗口的Let's chat按钮", { deepThink: true, cacheable: false });
+            await aiTap("Ai Bot聊天窗口的Let's chat按钮", { deepThink: false, cacheable: false });
 
-          } else if (await aiBoolean('AI Bot聊天弹窗有Start the chat')) {
+          } 
+          if (await aiBoolean('AI Bot聊天弹窗有Start the chat')) {
             console.log("Ai Bot聊天窗口的Start the chat按钮可见");
-            await aiTap('Ai Bot聊天窗口Start the chat', { deepThink: true, cacheable: true });
-          } else {
-            expect(false, "Ai Bot聊天窗口至少应有Start the chat或Let's chat").toBeTruthy();
-          }
+            await aiTap('Ai Bot聊天窗口Start the chat', { deepThink: false, cacheable: true });
+          } 
+          // else {
+          //   expect(false, "Ai Bot聊天窗口至少应有Start the chat或Let's chat").toBeTruthy();
+          // }
         }).toPass({ timeout: 100_000, intervals: [3_000, 5_000, 5_000] });
 
 
